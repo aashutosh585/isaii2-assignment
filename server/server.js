@@ -51,6 +51,23 @@ app.use('/api/interviews', interviewRoutes);
 app.use('/api/tests', testRoutes);
 app.use('/api/resumes', resumeRoutes);
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    message: 'PrepSaaS API is running!', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    endpoints: {
+      auth: '/api/auth',
+      users: '/api/user', 
+      interviews: '/api/interviews',
+      tests: '/api/tests',
+      resumes: '/api/resumes',
+      health: '/api/health'
+    }
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 

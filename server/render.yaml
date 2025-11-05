@@ -1,0 +1,7 @@
+version: 1
+build_command: npm install
+start_command: npm start
+runtime: node
+scaling:
+  num_instances: 1
+healthcheck_path: /api/health
