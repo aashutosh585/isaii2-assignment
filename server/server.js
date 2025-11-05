@@ -28,7 +28,13 @@ app.use(helmet());
 app.use(morgan('combined'));
 app.use(limiter);
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://isaii2-assignment-client.vercel.app',
+    'https://isaii2-assignment.vercel.app',
+    process.env.CLIENT_URL
+  ].filter(Boolean),
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
