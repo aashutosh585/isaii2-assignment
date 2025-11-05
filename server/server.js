@@ -34,19 +34,36 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Connect to MongoDB
+// Connect to MongoDB with better error handling for deployment
+if (!process.env.MONGO_URI && process.env.NODE_ENV === 'production') {
+  console.error('MONGO_URI environment variable is required in production');
+  process.exit(1);
+}
+
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/prepsaas')
   .then(() => {
     console.log('MongoDB connected successfully');
   })
   .catch((error) => {
     console.error('MongoDB connection error:', error);
-    process.exit(1);
+    // Don't exit in production serverless, just log the error
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
   });
+
+// Basic root route for testing
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    message: 'PrepSaaS API Server is running!',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/tests', testRoutes);
 app.use('/api/resumes', resumeRoutes);
@@ -91,11 +108,14 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV}`);
-});
+// For Vercel serverless deployment, we don't need to listen on a port
+// The app.listen() should only run in development/local environment
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV}`);
+  });
+}
 
 module.exports = app;
