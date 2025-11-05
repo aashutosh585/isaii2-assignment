@@ -67,6 +67,17 @@ app.get('/', (req, res) => {
   });
 });
 
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
+  next();
+});
+
+// Test route to verify routing works
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API routing is working!', timestamp: new Date().toISOString() });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
